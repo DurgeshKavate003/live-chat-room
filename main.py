@@ -55,9 +55,39 @@ def room():
     if room is None or session.get("name") is None or room not in rooms:
         return redirect(url_for('home'))
 
+    return render_template('room.html', code=room)
 
+@socketio.on("connect")
+def connect(auth):
+    room = session.get("room")
+    name = session.get('name')
 
-    return render_template('room.html')
+    if not room or not name:
+        return
+    
+    if not room in rooms:
+        leave_room(room)
+        return
+    
+    join_room(room)
+    send({"name": name, "message": "has Entered the Room"}, to=room)
+    rooms[room]['members'] += 1
+    print(f"{name} Joined the Room {room}")
+
+@socketio.on('disconnect')
+def disconnect():
+    room = session.get("room")
+    name = session.get('name')
+    leave_room(room)
+
+    if room in rooms:
+        rooms[room]['members'] -= 1
+
+        if rooms[room]['members'] <= 0:
+            del rooms[room]
+
+    send({"name": name, "message": "Has Left the Room"}, to=room)
+    print(f"{name} Has Left the Room {room}")
 
 
 
