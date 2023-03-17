@@ -57,6 +57,22 @@ def room():
 
     return render_template('room.html', code=room)
 
+@socketio.on("message")
+def message(data):
+    room = session.get("room")
+
+    if room not in rooms:
+        return
+    
+    content = {
+        "name": session.get("name"),
+        "message": data["data"]
+    }
+
+    send(content, to=room)
+    rooms[room]["messages"].append(content)
+    # print(f"{session.get('name')} said: {data['data']}")
+
 @socketio.on("connect")
 def connect(auth):
     room = session.get("room")
@@ -72,7 +88,7 @@ def connect(auth):
     join_room(room)
     send({"name": name, "message": "has Entered the Room"}, to=room)
     rooms[room]['members'] += 1
-    print(f"{name} Joined the Room {room}")
+    # print(f"{name} Joined the Room {room}")
 
 @socketio.on('disconnect')
 def disconnect():
@@ -87,7 +103,7 @@ def disconnect():
             del rooms[room]
 
     send({"name": name, "message": "Has Left the Room"}, to=room)
-    print(f"{name} Has Left the Room {room}")
+    # print(f"{name} Has Left the Room {room}")
 
 
 
