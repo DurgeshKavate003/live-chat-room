@@ -17,12 +17,12 @@
 
     const createMessage = (name, msg) => {
         const content = `
-            <div>
+            <div class='text'>
                 <span>
                     <strong>${name}</strong>: ${msg}
                 </span>
 
-                <span>
+                <span class='muted'>
                     ${new Date().toLocaleString()}
                 </span>
             </div>
@@ -41,5 +41,13 @@
         message.value = "";
     };
 </script>
+
+{% for msg in messages %}
+
+<script type="text/javascript">
+    createMessage("{{msg.name}}", "{{msg.message}}")
+</script>
+
+{% endfor %}
 
 {% endblock %}
